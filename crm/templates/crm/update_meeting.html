@@ -1,0 +1,103 @@
+{% extends 'crm/base.html' %}
+
+{% block content %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+
+    h2 {
+        text-align: center;
+        margin-top: 20px;
+        color: #2c3e50;
+    }
+
+    .form-container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: block;
+        color: #2c3e50;
+    }
+
+    input[type="datetime-local"],
+    textarea,
+    select {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1rem;
+        color: #555;
+    }
+
+    textarea {
+        resize: none;
+    }
+
+    button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 1rem;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s;
+        display: block;
+        margin: 0 auto;
+    }
+
+    button:hover {
+        background-color: #0056b3;
+    }
+
+    .back-to-list {
+        display: inline-block;
+        margin-top: 20px;
+        text-align: center;
+        color: #007bff;
+        font-weight: bold;
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+
+    .back-to-list:hover {
+        color: #0056b3;
+    }
+</style>
+
+<h2>Update Meeting</h2>
+
+<div class="form-container">
+    <form method="POST">
+        {% csrf_token %}
+        <label for="date">Date:</label>
+        <input type="datetime-local" id="date" name="date" value="{{ meeting.date|date:'Y-m-d\\TH:i' }}" required>
+
+        <label for="notes">Notes:</label>
+        <textarea id="notes" name="notes" rows="4" required>{{ meeting.notes }}</textarea>
+
+        <label for="remark">Remark:</label>
+        <select id="remark" name="remark">
+            <option value="Pending" {% if meeting.remark == "Pending" %}selected{% endif %}>Pending</option>
+            <option value="Completed" {% if meeting.remark == "Completed" %}selected{% endif %}>Completed</option>
+        </select>
+
+        <button type="submit">Update Meeting</button>
+    </form>
+    <a href="{% url 'meetings_list' meeting.client.id %}" class="back-to-list">Back to Meetings List</a>
+</div>
+{% endblock %}

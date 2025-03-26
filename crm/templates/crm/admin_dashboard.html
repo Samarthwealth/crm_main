@@ -1,0 +1,89 @@
+{% extends 'crm/base.html' %}
+
+{% block content %}
+<h2>Admin Dashboard</h2>
+
+<!-- Dropdown for selecting Relationship Manager -->
+<form method="GET" action="" style="margin-bottom: 20px;">
+    <label for="relationship_manager">Filter by Relationship Manager:</label>
+    <select name="relationship_manager_id" id="relationship_manager" onchange="this.form.submit()">
+        <option value="">All Managers</option>
+        {% for manager in relationship_managers %}
+            <option value="{{ manager.id }}" {% if manager.id|stringformat:"s" == selected_manager_id %}selected{% endif %}>
+                {{ manager.first_name }} {{ manager.last_name }}
+            </option>
+        {% endfor %}
+    </select>
+</form>
+
+<div style="width: 100%; max-width: 1200px; margin: auto;">
+    <canvas id="meetingsChart"></canvas>
+    <canvas id="salesChart" style="margin-top: 40px;"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Data from the backend (convert Django's managers_data into JavaScript data)
+    const managersData = JSON.parse('{{ managers_data|escapejs }}');
+    const labels = managersData.map(manager => `${manager.first_name} ${manager.last_name}`);
+    const meetingsData = managersData.map(manager => manager.total_meetings || 0);
+    const salesData = managersData.map(manager => manager.total_sales || 0);
+
+    // Create Meetings Chart
+    new Chart(document.getElementById('meetingsChart'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Meetings',
+                data: meetingsData,
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Create Sales Chart
+    new Chart(document.getElementById('salesChart'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Sales',
+                data: salesData,
+                backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

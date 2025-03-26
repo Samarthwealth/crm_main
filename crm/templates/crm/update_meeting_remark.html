@@ -1,0 +1,10 @@
+<h2>Update Meeting Remark</h2>
+<form method="POST">
+    {% csrf_token %}
+    <label for="remark">Remark:</label>
+    <select id="remark" name="remark">
+        <option value="Pending" {% if meeting.remark == "Pending" %}selected{% endif %}>Pending</option>
+        <option value="Completed" {% if meeting.remark == "Completed" %}selected{% endif %}>Completed</option>
+    </select><br><br>
+    <button type="submit">Update Remark</button>
+</form>

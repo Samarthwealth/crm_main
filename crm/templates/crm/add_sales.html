@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Sale</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+        .container {
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+        label {
+            margin-top: 15px;
+            font-size: 14px;
+            text-align: left;
+        }
+        input, select {
+            padding: 10px;
+            margin: 5px 0;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 100%;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        a {
+            text-decoration: none;
+            color: #3498db;
+            font-size: 14px;
+            display: inline-block;
+            margin-top: 15px;
+        }
+        a:hover {
+            color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Add Sale for {{ client.name }}</h1>
+        <form method="POST">
+            {% csrf_token %}
+
+            <label for="product">Product:</label>
+            <select id="product" name="product" required>
+                <option value="SIP">Systematic Investment Plan</option>
+                <option value="LUMP">Lumpsum</option>
+                <option value="HI">Helath Insurance</option>
+                <option value="TI">Term Insurance</option>
+                <option value="PMS">PMS</option>
+                <option value="AIF">AIF</option>
+                <option value="WILL">Will</option>
+                <option value="GI">General Insurance</option>
+            </select>
+            <label for="fund_name">FundName:</label>
+            <input type="text" id="fund_name" name="fund_name" step="0.01" required>
+
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" name="amount" step="0.01" required>
+
+            <label for="sale_date">Sale Date:</label>
+            <input type="date" id="sale_date" name="sale_date" required>
+
+            <button type="submit">Save Sale</button>
+        </form>
+
+        <a href="{% url 'client_list' %}">Back to Client List</a>
+    </div>
+</body>
+</html>
