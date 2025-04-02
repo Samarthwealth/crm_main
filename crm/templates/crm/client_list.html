@@ -21,15 +21,16 @@
         background: #ffffff;
         border-radius: 10px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        overflow-x: auto; /* Enables table scrolling */
     }
 
     table {
         width: 100%;
+        min-width: 600px; /* Prevent table becoming too narrow */
         border-collapse: collapse;
     }
 
-    th,
-    td {
+    th, td {
         padding: 15px;
         text-align: left;
     }
@@ -48,13 +49,20 @@
         background-color: #f1f1f1;
     }
 
+    .action-buttons {
+        display: flex;
+        flex-wrap: wrap; /* Buttons wrap to avoid overlap */
+        gap: 5px; /* Space between buttons */
+    }
+
     .action-buttons a {
+        flex: 1 1 calc(33.333% - 10px); /* Adjust width for up to 3 buttons per row */
         text-decoration: none;
         padding: 5px 10px;
-        margin: 0 5px;
         border-radius: 5px;
         font-size: 0.9rem;
         transition: background-color 0.3s;
+        text-align: center;
     }
 
     .action-buttons .add-meeting {
@@ -82,6 +90,12 @@
 
     .action-buttons .update-client:hover {
         background-color: #e0a800;
+    }
+
+    @media (max-width: 768px) {
+        .action-buttons a {
+            flex: 1 1 100%; /* Buttons take full width on mobile */
+        }
     }
 
     .add-client-btn {
@@ -148,9 +162,44 @@
         cursor: not-allowed;
         opacity: 0.8;
     }
+
+    .search-container {
+        text-align: center;
+        margin: 20px 0;
+    }
+
+    .search-container input {
+        padding: 10px;
+        width: 300px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .search-container button {
+        padding: 10px 15px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .search-container button:hover {
+        background-color: #0056b3;
+    }
 </style>
 
 <h2>Client List</h2>
+
+<!-- Search Form -->
+<div class="search-container">
+    <form method="get" action="">
+        <input type="text" name="search" placeholder="Search by Name or PAN">
+        <button type="submit">Search</button>
+    </form>
+</div>
 
 <!-- Button for Admin Superuser -->
 {% if request.user.is_superuser %}
@@ -164,6 +213,7 @@
                 <th>Client Name</th>
                 <th>Email</th>
                 <th>Phone</th>
+                <th>PAN</th>
                 <th>Relationship Manager</th>
                 <th>Actions</th>
             </tr>
@@ -174,13 +224,10 @@
                 <td>{{ client.name }}</td>
                 <td>{{ client.email }}</td>
                 <td>{{ client.phone }}</td>
+                <td>{{ client.pan }}</td>
                 <td>
                     {% if client.relationship_manager %}
-                        {% if client.relationship_manager == request.user and request.user.is_superuser %}
-                            {{ client.relationship_manager.get_full_name }} (Admin)
-                        {% else %}
-                            {{ client.relationship_manager.get_full_name }}
-                        {% endif %}
+                        {{ client.relationship_manager.get_full_name }}
                     {% else %}
                         Not Assigned
                     {% endif %}
@@ -193,7 +240,7 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="5" class="no-clients">No clients available</td>
+                <td colspan="6" class="no-clients">No clients available</td>
             </tr>
             {% endfor %}
         </tbody>
