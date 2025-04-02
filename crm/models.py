@@ -38,7 +38,7 @@ class Meeting(models.Model):
         choices=[('Completed', 'Completed'), ('Pending', 'Pending')],
         default='Pending'
     )
-
+    updated_time = models.DateTimeField(auto_now=True)
     def __str__(self):
         return f"Meeting with {self.client.name} on {self.date}"
 
