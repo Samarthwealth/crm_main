@@ -13,20 +13,55 @@ from .forms import FileUploadForm, AddClientForm
 from django.db.models import Count, Sum
 import json
 
+# @login_required
+# def client_list(request):
+#     if request.user.is_superuser:
+#         clients = Client.objects.all()
+#     else:
+#         clients = Client.objects.filter(relationship_manager=request.user)
+#
+#     # Pagination
+#     paginator = Paginator(clients, 20)  # Show 10 clients per page
+#     page_number = request.GET.get('page')  # Get the current page number from query parameters
+#     page_obj = paginator.get_page(page_number)  # Get the clients for the current page
+#
+#     return render(request, 'crm/client_list.html', {'page_obj': page_obj})
+
+from django.db.models import Q  # For complex filtering
+
+
 @login_required
 def client_list(request):
+    # Get all clients based on user type
     if request.user.is_superuser:
         clients = Client.objects.all()
     else:
         clients = Client.objects.filter(relationship_manager=request.user)
 
-    # Pagination
-    paginator = Paginator(clients, 20)  # Show 10 clients per page
-    page_number = request.GET.get('page')  # Get the current page number from query parameters
-    page_obj = paginator.get_page(page_number)  # Get the clients for the current page
+    # Handle search functionality
+    search_query = request.GET.get('search', '').strip()  # Retrieve and sanitize search input
+    if search_query:  # Check if a search term is provided
+        try:
+            clients = clients.filter(
+                Q(name__icontains=search_query) | Q(pan__icontains=search_query)
+            )
+        except Exception as e:
+            # Log the error if needed (adjust according to your logging setup)
+            print(f"Error in search functionality: {e}")
+            clients = clients.none()  # Return no clients if there's a query issue
 
-    return render(request, 'crm/client_list.html', {'page_obj': page_obj})
+    # Pagination setup
+    paginator = Paginator(clients, 20)  # Show 20 clients per page
+    page_number = request.GET.get('page')  # Get page number from query params
+    page_obj = paginator.get_page(page_number)  # Get paginated client list for current page
 
+    # Context for rendering the template
+    context = {
+        'page_obj': page_obj,
+        'search_query': search_query,  # Pass back search term to persist it in the search input
+    }
+
+    return render(request, 'crm/client_list.html', context)
 #upload bulk client
 
 @login_required
@@ -227,9 +262,47 @@ def add_sale(request, client_id):
 #     return render(request, 'crm/meetings_list.html', {'meetings': meetings, 'client': client})
 
 #meeting List
+# @login_required
+# def meetings_list(request, client_id=None):
+#     filter_remark = request.GET.get('remark')  # Get the filter value from the query parameters
+#
+#     if request.user.is_superuser:
+#         # Superusers see all meetings
+#         meetings = Meeting.objects.select_related('client', 'relationship_manager').all()
+#         client = None  # No specific client for superusers
+#     else:
+#         # For relationship managers
+#         if client_id:
+#             # Fetch the client and their associated meetings
+#             client = get_object_or_404(Client, id=client_id, relationship_manager=request.user)
+#             meetings = Meeting.objects.filter(client=client, relationship_manager=request.user).select_related('relationship_manager')
+#         else:
+#             # Show all meetings managed by the logged-in relationship manager
+#             client = None
+#             meetings = Meeting.objects.filter(relationship_manager=request.user).select_related('client')
+#
+#     # Apply the filtering based on the `remark` field if a filter is provided
+#     if filter_remark in ['Completed', 'Pending']:
+#         meetings = meetings.filter(remark=filter_remark)
+#
+#     # Pagination
+#     paginator = Paginator(meetings, 20)  # Show 20 meetings per page
+#     page_number = request.GET.get('page')
+#     page_obj = paginator.get_page(page_number)
+#
+#     return render(request, 'crm/meetings_list.html', {
+#         'page_obj': page_obj,
+#         'client': client,
+#         'filter_remark': filter_remark  # Include the current filter value for the template
+#     })
+
+
+
 @login_required
 def meetings_list(request, client_id=None):
-    filter_remark = request.GET.get('remark')  # Get the filter value from the query parameters
+    # Get filter and search parameters from the request
+    filter_remark = request.GET.get('remark', '').strip()
+    search_query = request.GET.get('search', '').strip()  # For client name or relationship manager name
 
     if request.user.is_superuser:
         # Superusers see all meetings
@@ -246,7 +319,15 @@ def meetings_list(request, client_id=None):
             client = None
             meetings = Meeting.objects.filter(relationship_manager=request.user).select_related('client')
 
-    # Apply the filtering based on the `remark` field if a filter is provided
+    # Apply search filter (search by client name or relationship manager name)
+    if search_query:
+        meetings = meetings.filter(
+            Q(client__name__icontains=search_query) |
+            Q(relationship_manager__first_name__icontains=search_query) |
+            Q(relationship_manager__last_name__icontains=search_query)
+        )
+
+    # Apply the remark filter
     if filter_remark in ['Completed', 'Pending']:
         meetings = meetings.filter(remark=filter_remark)
 
@@ -258,7 +339,8 @@ def meetings_list(request, client_id=None):
     return render(request, 'crm/meetings_list.html', {
         'page_obj': page_obj,
         'client': client,
-        'filter_remark': filter_remark  # Include the current filter value for the template
+        'filter_remark': filter_remark,  # Include the current filter value for the template
+        'search_query': search_query,  # Include the search query for the template
     })
 @login_required
 def sales_list(request):
