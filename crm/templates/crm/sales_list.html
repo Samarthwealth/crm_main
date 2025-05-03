@@ -31,7 +31,7 @@
     th, td {
         padding: 15px;
         text-align: left;
-        vertical-align: top; /* Align content to the top */
+        vertical-align: top;
     }
 
     th {
@@ -56,9 +56,8 @@
         border-radius: 10px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         display: flex;
-        flex-wrap: wrap; /* Handle multiple lines */
+        flex-wrap: wrap;
         gap: 15px;
-        row-gap: 20px; /* Space between rows */
         align-items: center;
     }
 
@@ -72,6 +71,17 @@
         border: 1px solid #ccc;
         border-radius: 5px;
         width: 200px;
+    }
+
+    .filter-form .date-range {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .filter-form .date-range div {
+        display: flex;
+        flex-direction: column;
     }
 
     .filter-form button {
@@ -95,7 +105,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        gap: 10px; /* Space between links */
+        gap: 10px;
         font-size: 1rem;
     }
 
@@ -112,8 +122,8 @@
 
     .pagination a:hover {
         background-color: #218838;
-        transform: scale(1.1); /* Slight scaling effect on hover */
-        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+        transform: scale(1.1);
+        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
     }
 
     .pagination span {
@@ -131,6 +141,42 @@
         cursor: not-allowed;
         opacity: 0.8;
     }
+
+
+
+    .action-button {
+        text-decoration: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        font-weight: bold;
+        display: inline-block;
+        text-align: center;
+        transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+    }
+
+    .update {
+        background-color: #ffc107;
+        color: black;
+    }
+
+    .update:hover {
+        background-color: #e0a800;
+        transform: scale(1.1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .delete {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .delete:hover {
+        background-color: #c82333;
+        transform: scale(1.1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+
 </style>
 
 <h2>Sales List</h2>
@@ -142,15 +188,19 @@
         <input type="text" id="relationship_manager" name="relationship_manager" value="{{ request.GET.relationship_manager }}">
         {% endif %}
 
-        <div style="flex-basis: 100%;"></div> <!-- Forces a new line -->
+        <label for="client_name">Client Name:</label>
+        <input type="text" id="client_name" name="client_name" placeholder="Enter Client Name" value="{{ request.GET.client_name }}">
 
-        <label for="start_date">Start Date:</label>
-        <input type="date" id="start_date" name="start_date" value="{{ request.GET.start_date }}">
-
-        <label for="end_date">End Date:</label>
-        <input type="date" id="end_date" name="end_date" value="{{ request.GET.end_date }}">
-
-        <div style="flex-basis: 100%;"></div> <!-- Forces a new line -->
+        <div class="date-range">
+            <div>
+                <label for="start_date">Start Date:</label>
+                <input type="date" id="start_date" name="start_date" value="{{ request.GET.start_date }}">
+            </div>
+            <div>
+                <label for="end_date">End Date:</label>
+                <input type="date" id="end_date" name="end_date" value="{{ request.GET.end_date }}">
+            </div>
+        </div>
 
         <label for="product">Product:</label>
         <input type="text" id="product" name="product" value="{{ request.GET.product }}">
@@ -188,21 +238,25 @@
                 <td>{{ sale.fund_name }}</td>
                 <td>{{ sale.amount }}</td>
                 <td>{{ sale.sale_date }}</td>
+                <td>
+                    <a href="{% url 'update_sale' sale.id %}" class="action-button update">Update</a>
+                    <a href="{% url 'delete_sale' sale.id %}" class="action-button delete">Delete</a>
+                </td>
+
             </tr>
             {% empty %}
             <tr>
-                <td colspan="6" style="text-align: center;">No sales found.</td>
+                <td colspan="7" style="text-align: center;">No sales found.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
 
-<!-- Pagination Controls -->
 <div class="pagination">
     {% if page_obj.has_previous %}
-        <a href="?page=1{% if request.GET.relationship_manager %}&relationship_manager={{ request.GET.relationship_manager }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.product %}&product={{ request.GET.product }}{% endif %}">First</a>
-        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.relationship_manager %}&relationship_manager={{ request.GET.relationship_manager }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.product %}&product={{ request.GET.product }}{% endif %}">Previous</a>
+        <a href="?page=1{% if request.GET.relationship_manager %}&relationship_manager={{ request.GET.relationship_manager }}{% endif %}{% if request.GET.client_name %}&client_name={{ request.GET.client_name }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.product %}&product={{ request.GET.product }}{% endif %}">First</a>
+        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.relationship_manager %}&relationship_manager={{ request.GET.relationship_manager }}{% endif %}{% if request.GET.client_name %}&client_name={{ request.GET.client_name }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.product %}&product={{ request.GET.product }}{% endif %}">Previous</a>
     {% else %}
         <span class="disabled">First</span>
         <span class="disabled">Previous</span>
@@ -211,8 +265,8 @@
     <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
 
     {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.relationship_manager %}&relationship_manager={{ request.GET.relationship_manager }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.product %}&product={{ request.GET.product }}{% endif %}">Next</a>
-        <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.relationship_manager %}&relationship_manager={{ request.GET.relationship_manager }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.product %}&product={{ request.GET.product }}{% endif %}">Last</a>
+        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.relationship_manager %}&relationship_manager={{ request.GET.relationship_manager }}{% endif %}{% if request.GET.client_name %}&client_name={{ request.GET.client_name }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.product %}&product={{ request.GET.product }}{% endif %}">Next</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.relationship_manager %}&relationship_manager={{ request.GET.relationship_manager }}{% endif %}{% if request.GET.client_name %}&client_name={{ request.GET.client_name }}{% endif %}{% if request.GET.start_date %}&start_date={{ request.GET.start_date }}{% endif %}{% if request.GET.end_date %}&end_date={{ request.GET.end_date }}{% endif %}{% if request.GET.product %}&product={{ request.GET.product }}{% endif %}">Last</a>
     {% else %}
         <span class="disabled">Next</span>
         <span class="disabled">Last</span>
