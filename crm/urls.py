@@ -28,6 +28,8 @@ urlpatterns = [
     path('add-client/', views.add_client, name='add_client'),
     path('export-meetings/', views.export_meetings_to_excel, name='export_meetings'),
     path('export-sales/', views.export_sales_to_excel, name='export_sales'),
+    path('sale/update/<int:sale_id>/', views.update_sale, name='update_sale'),
+    path('sale/delete/<int:sale_id>/', views.delete_sale, name='delete_sale'),
 
 ]
 
