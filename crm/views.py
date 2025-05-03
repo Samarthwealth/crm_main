@@ -13,19 +13,6 @@ from .forms import FileUploadForm, AddClientForm
 from django.db.models import Count, Sum
 import json
 
-# @login_required
-# def client_list(request):
-#     if request.user.is_superuser:
-#         clients = Client.objects.all()
-#     else:
-#         clients = Client.objects.filter(relationship_manager=request.user)
-#
-#     # Pagination
-#     paginator = Paginator(clients, 20)  # Show 10 clients per page
-#     page_number = request.GET.get('page')  # Get the current page number from query parameters
-#     page_obj = paginator.get_page(page_number)  # Get the clients for the current page
-#
-#     return render(request, 'crm/client_list.html', {'page_obj': page_obj})
 
 from django.db.models import Q  # For complex filtering
 
@@ -246,55 +233,8 @@ def add_sale(request, client_id):
         return redirect('client_list')
 
     return render(request, 'crm/add_sales.html', {'client': client})
-# @login_required
-# def meetings_list(request, client_id=None):
-#     if request.user.is_superuser:
-#         # Superusers see all meetings
-#         meetings = Meeting.objects.select_related('client', 'relationship_manager').all()
-#         client = None  # No specific client for superusers
-#     else:
-#         if not client_id:
-#             return redirect('client_list')  # Redirect if client_id is missing
-#         # Fetch the client and their associated meetings
-#         client = get_object_or_404(Client, id=client_id, relationship_manager=request.user)
-#         meetings = Meeting.objects.filter(client=client).select_related('relationship_manager')
-#
-#     return render(request, 'crm/meetings_list.html', {'meetings': meetings, 'client': client})
 
-#meeting List
-# @login_required
-# def meetings_list(request, client_id=None):
-#     filter_remark = request.GET.get('remark')  # Get the filter value from the query parameters
-#
-#     if request.user.is_superuser:
-#         # Superusers see all meetings
-#         meetings = Meeting.objects.select_related('client', 'relationship_manager').all()
-#         client = None  # No specific client for superusers
-#     else:
-#         # For relationship managers
-#         if client_id:
-#             # Fetch the client and their associated meetings
-#             client = get_object_or_404(Client, id=client_id, relationship_manager=request.user)
-#             meetings = Meeting.objects.filter(client=client, relationship_manager=request.user).select_related('relationship_manager')
-#         else:
-#             # Show all meetings managed by the logged-in relationship manager
-#             client = None
-#             meetings = Meeting.objects.filter(relationship_manager=request.user).select_related('client')
-#
-#     # Apply the filtering based on the `remark` field if a filter is provided
-#     if filter_remark in ['Completed', 'Pending']:
-#         meetings = meetings.filter(remark=filter_remark)
-#
-#     # Pagination
-#     paginator = Paginator(meetings, 20)  # Show 20 meetings per page
-#     page_number = request.GET.get('page')
-#     page_obj = paginator.get_page(page_number)
-#
-#     return render(request, 'crm/meetings_list.html', {
-#         'page_obj': page_obj,
-#         'client': client,
-#         'filter_remark': filter_remark  # Include the current filter value for the template
-#     })
+
 
 
 
@@ -389,6 +329,30 @@ def sales_list(request):
         'end_date': end_date,
         'product': product,
     })
+    from django.utils.dateparse import parse_datetime
+
+@login_required
+def update_sale(request, sale_id):
+    sale = get_object_or_404(Sale, id=sale_id)
+
+    if request.method == 'POST':
+        sale.product = request.POST['product']  # Directly assign selected choice (string)
+        sale.fund_name = request.POST['fund_name']
+        sale.amount = request.POST['amount']
+        sale.sale_date = parse_datetime(request.POST['sale_date'])  # Convert to datetime
+        sale.save()
+        return redirect('sales_list')
+
+    return render(request, 'crm/update_sales.html', {'sale': sale})
+@login_required
+def delete_sale(request, sale_id):
+    sale = get_object_or_404(Sale, id=sale_id)
+
+    if request.method == 'POST':  # Confirm before deleting
+        sale.delete()
+        return redirect('sales_list')
+
+    return render(request, 'crm/delete_sales.html', {'sale': sale})
 from django.db.models import Count, Sum
 
 # @login_required
